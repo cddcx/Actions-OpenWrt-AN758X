@@ -213,6 +213,7 @@ clone https://github.com/QiuSimons/luci-app-dae    feeds/luci/applications/luci-
 #clone https://github.com/kenzok8/openwrt-honk.git  "$PKG_DIR/honk"  "" --depth=1
 #clone https://github.com/QiuSimons/luci-app-honk.git  feeds/luci/applications/luci-app-honk  "" --depth=1
 clone https://github.com/QiuSimons/luci-app-honk.git  "$PKG_DIR/honk"  "" --depth=1
+clone https://github.com/QiuSimons/vmlinux-btf.git "$PKG_DIR/honk"  "" --depth=1
 # ------------------------------------------------------------------
 # 预放 honk-core.bin：--if-needed 检测到无 stamp 的产物会直接复用，
 # 跳过 zig/bpf-linker/cargo 工具链校验和源码编译
