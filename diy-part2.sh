@@ -349,11 +349,14 @@ if [ -f .config ]; then
 
 # ==== build-mf-NoOC 12. Custom configuration (diy-part2 port) ====
 # --- 附加应用 ---
-CONFIG_PACKAGE_udpxy=y
+#CONFIG_PACKAGE_udpxy=y
+CONFIG_PACKAGE_rtp2httpd=y
+CONFIG_PACKAGE_luci-app-rtp2httpd=y
+CONFIG_PACKAGE_luci-i18n-rtp2httpd-zh-cn=y
 CONFIG_PACKAGE_acme-acmesh-dnsapi=y
 CONFIG_PACKAGE_luci-app-acme=y
 CONFIG_PACKAGE_luci-ssl-openssl=y
-#CONFIG_PACKAGE_luci-app-ddns-go=y
+CONFIG_PACKAGE_luci-app-ddns-go=y
 CONFIG_PACKAGE_luci-app-uhttpd=y
 CONFIG_PACKAGE_msmtp=y
 CONFIG_PACKAGE_msmtp-mta=y
@@ -371,8 +374,8 @@ CONFIG_PACKAGE_htop=y
 # regulator late-cleanup 关闭（U 盘开机 ~34s 断电问题，等价 10.6 的防护）
 CONFIG_PACKAGE_kmod-regulator-userspace-consumer=y
 # EIP93 硬件加速（配合 10.7 内核补丁再开更好）
-CONFIG_PACKAGE_kmod-crypto-hw-eip93=y
-CONFIG_PACKAGE_kmod-cryptodev=y
+#CONFIG_PACKAGE_kmod-crypto-hw-eip93=y
+#CONFIG_PACKAGE_kmod-cryptodev=y
 CONFIG_PACKAGE_kmod-sched-bpf=y
 CONFIG_PACKAGE_kmod-sched-cake=y
 CONFIG_PACKAGE_kmod-xdp-sockets-diag=y
