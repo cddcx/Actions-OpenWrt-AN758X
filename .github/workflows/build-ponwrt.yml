@@ -884,9 +884,9 @@ jobs:
           sed -i '/^CONFIG_CCACHE=/d; /^# CONFIG_CCACHE is not set/d' .config
           echo 'CONFIG_CCACHE=y' >> .config
           make defconfig >/dev/null 2>&1 || true
-          # 定制中文翻译包
-          chmod +x "$GITHUB_WORKSPACE/$DIY_P3_SH"
-          "$GITHUB_WORKSPACE/$DIY_P3_SH"
+          # 定制中文翻译包 (make it, just remove # on line 888/889)
+          #chmod +x "$GITHUB_WORKSPACE/$DIY_P3_SH"
+          #"$GITHUB_WORKSPACE/$DIY_P3_SH"
 
           # 2) 缺二进制就补装（ccache 依赖 xxhash → cmake，首次会多花几分钟）
           if [ ! -x staging_dir/host/bin/ccache ]; then
