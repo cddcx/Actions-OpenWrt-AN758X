@@ -362,6 +362,7 @@ CONFIG_PACKAGE_msmtp=y
 CONFIG_PACKAGE_msmtp-mta=y
 CONFIG_PACKAGE_mutt=y
 CONFIG_PACKAGE_vim-fuller=y
+CONFIG_PACKAGE_kmod-dummy=y
 #CONFIG_PACKAGE_luci-app-ttyd=y
 #CONFIG_PACKAGE_luci-app-dae=y
 #CONFIG_PACKAGE_luci-app-honk=y
