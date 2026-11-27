@@ -17,7 +17,7 @@ set -euo pipefail
 LAN_IP="${LAN_IP:-192.168.2.1}"                     # [10] 默认 LAN IP
 LAN_HOSTNAME="${LAN_HOSTNAME:-ZtbWrt}"              # [10] 默认主机名
 ENABLE_USB_OPT_MOUNT="${ENABLE_USB_OPT_MOUNT:-1}"   # [7.7] USB 自动挂载 /opt 开关
-ENABLE_SYSCTL_TUNING="${ENABLE_SYSCTL_TUNING:-1}"   # [7.9] sysctl 调优开关
+#ENABLE_SYSCTL_TUNING="${ENABLE_SYSCTL_TUNING:-1}"   # [7.9] sysctl 调优开关
 
 echo "=========================================="
 echo "默认值定制 (diy-part2NoWiFi.sh)"
@@ -106,123 +106,6 @@ exit 0
 EOF
   chmod +x files/etc/uci-defaults/99-mount-opt
   echo "✅ [7.7] USB auto-mount overlay generated (mount-opt / hotplug / uci-defaults)"
-fi
-
-# ================================================================
-# [7.9] /etc/sysctl.conf 内核调优（移植自 build-mf-NoOC 步骤 7.9）
-# 整体覆盖 base-files 自带文件；开机由 procd 执行 sysctl -p 加载。
-# 内核不认识的 key 只会有 warning，不会阻塞启动。
-# ================================================================
-if [ "${ENABLE_SYSCTL_TUNING}" = "1" ]; then
-  mkdir -p files/etc
-  cat > files/etc/sysctl.conf <<'EOF'
-# ===========================================
-# XD-040-MF (AN7583 双核AES / 512MB / 无Zram) + OpenClash
-# 场景：游戏 UDP 保活 / 2.5G 有线回程 / IPTV / 内存敏感型调优
-# ===========================================
-
-#### 1. 内存管理 (512MB 无 Zram 安全策略) ####
-vm.swappiness = 0
-
-# 应急水位 32MB (6.25%)：给 PPE/DMA 突发申请留足余量，防网络卡顿
-vm.min_free_kbytes = 32768
-
-# 0 = 启发式模式(默认)。保持 0；设 2 会禁止过量提交，Clash 下会导致 malloc 失败
-vm.overcommit_memory = 0
-
-# 低内存机器：加速 dentry/inode 缓存回收，给应用腾内存
-vm.vfs_cache_pressure = 150
-vm.dirty_background_ratio = 5
-vm.dirty_ratio = 10
-vm.dirty_expire_centisecs = 3000
-vm.dirty_writeback_centisecs = 500
-
-# 内核 panic (含 OOM 死锁) 10 秒后自动重启自愈，512MB 无人值守必备
-kernel.panic = 10
-
-#### 2. 网络核心缓冲区 (2.5G 吞吐 + 512MB 平衡) ####
-net.core.rmem_max = 4194304
-net.core.wmem_max = 4194304
-net.core.rmem_default = 131072
-net.core.wmem_default = 131072
-
-# 开 HNAT 硬件卸载时 2000 够用；纯软转发跑满 2.5G 出现丢包则回调 4000
-net.core.netdev_max_backlog = 2000
-
-# ★ 补：NAPI 时间片预算，与 budget 配对
-net.core.netdev_budget = 600
-#net.core.netdev_budget_usecs = 8000
-net.core.somaxconn = 4096
-
-#### 3. 游戏 UDP 保活 ####
-net.netfilter.nf_conntrack_udp_timeout = 90
-net.netfilter.nf_conntrack_udp_timeout_stream = 180
-
-#### 4. TCP 协议栈 ####
-net.ipv4.tcp_fastopen = 3
-net.ipv4.tcp_tw_reuse = 1
-net.ipv4.tcp_fin_timeout = 30
-net.ipv4.tcp_keepalive_time = 600
-net.ipv4.tcp_keepalive_intvl = 30
-net.ipv4.tcp_keepalive_probes = 3
-
-# 32/48/64MB 三级水位
-net.ipv4.tcp_mem = 8192 12288 16384
-net.ipv4.tcp_rmem = 4096 131072 4194304
-net.ipv4.tcp_wmem = 4096 131072 4194304
-
-# ★ 新增：限制 TIME_WAIT 总量，防 BT 场景积累吃内存
-net.ipv4.tcp_max_tw_buckets = 16384
-
-# ★ 新增：显式开启 syncookie 防洪
-net.ipv4.tcp_syncookies = 1
-
-# ★ 新增：代理链路 PMTU 黑洞自动探测
-net.ipv4.tcp_mtu_probing = 1
-
-# 可选：固件带 BBR 时取消注释（基座已编 kmod-tcp-bbr，此处无需 opkg）
-# net.ipv4.tcp_congestion_control = bbr
-# net.core.default_qdisc = fq
-
-#### 5. UDP 协议栈水位 (★ 新增，游戏/OpenClash UDP 关键) ####
-# 单位：页(4KB)，32/48/64MB，与 tcp_mem 对齐
-net.ipv4.udp_mem = 8192 12288 16384
-net.ipv4.udp_rmem_min = 16384
-net.ipv4.udp_wmem_min = 16384
-
-#### 6. 连接追踪 ####
-# 65536 条 ≈ 20MB，家庭 + BT 足够；报 full 再临时提 131072 观察
-net.netfilter.nf_conntrack_max = 65536
-
-# ★ 新增：hash 桶 = max/4，降低冲突（若内核只读此项则删掉此行）
-net.netfilter.nf_conntrack_buckets = 16384
-net.netfilter.nf_conntrack_tcp_timeout_established = 1200
-net.netfilter.nf_conntrack_tcp_timeout_time_wait = 30
-net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60
-net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 60
-
-#### 7. 端口 / ARP / 文件句柄 ####
-net.ipv4.ip_local_port_range = 1024 65535
-net.ipv4.neigh.default.gc_thresh1 = 512
-net.ipv4.neigh.default.gc_thresh2 = 2048
-net.ipv4.neigh.default.gc_thresh3 = 4096
-fs.file-max = 65536
-
-#### 8. 路由器安全加固 (★ 新增) ####
-net.ipv4.conf.all.accept_redirects = 0
-net.ipv4.conf.default.accept_redirects = 0
-net.ipv4.conf.all.send_redirects = 0
-net.ipv4.conf.default.send_redirects = 0
-net.ipv4.conf.all.accept_source_route = 0
-net.ipv4.conf.default.accept_source_route = 0
-
-#### 9. IPTV (原样保留) ####
-net.ipv4.conf.all.force_igmp_version = 2
-net.ipv4.conf.default.force_igmp_version = 2
-net.ipv4.conf.all.rp_filter = 0
-net.ipv4.conf.default.rp_filter = 0
-EOF
-  echo "✅ [7.9] files/etc/sysctl.conf overlay generated"
 fi
 
 # ================================================================
