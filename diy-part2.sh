@@ -17,7 +17,7 @@ set -euo pipefail
 LAN_IP="${LAN_IP:-192.168.2.1}"                     # [10] 默认 LAN IP
 LAN_HOSTNAME="${LAN_HOSTNAME:-ZtbWrt}"              # [10] 默认主机名
 ENABLE_USB_OPT_MOUNT="${ENABLE_USB_OPT_MOUNT:-1}"   # [7.7] USB 自动挂载 /opt 开关
-#ENABLE_SYSCTL_TUNING="${ENABLE_SYSCTL_TUNING:-1}"   # [7.9] sysctl 调优开关
+ENABLE_SYSCTL_TUNING="${ENABLE_SYSCTL_TUNING:-1}"   # [7.9] sysctl 调优开关
 
 echo "=========================================="
 echo "默认值定制 (diy-part2NoWiFi.sh)"
