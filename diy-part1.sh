@@ -204,7 +204,7 @@ endgroup
 group "覆盖 feeds/luci 中的 dae / honk，并将 honk 放入 package/custom"
 
 rm -rf feeds/luci/applications/luci-app-dae
-rm -rf feeds/luci/applications/luci-app-openclash
+#rm -rf feeds/luci/applications/luci-app-openclash
 rm -rf feeds/luci/applications/luci-app-honk
 
 clone https://github.com/QiuSimons/luci-app-dae    feeds/luci/applications/luci-app-dae
@@ -284,7 +284,7 @@ endgroup
 #fi
 #endgroup
 
-# OpenClash update to new version
+# OpenClash update to latest version
 rm -rf feeds/luci/applications/luci-app-openclash
 #git clone --depth=1 -b dev https://github.com/vernesong/OpenClash.git package/custom/openclash
 git clone --depth=1 -b dev https://github.com/vernesong/OpenClash.git feeds/luci/applications/luci-app-openclash
